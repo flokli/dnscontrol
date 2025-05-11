@@ -112,6 +112,25 @@ func (api *autoDNSProvider) findZoneSystemNameServer(domain string) (*models.Nam
 	return systemNameServer, nil
 }
 
+func (api *autoDNSProvider) getDomain(domain string) (*Domain, error) {
+	responseData, err := api.request("GET", "domain/"+domain, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var responseObject JSONResponseDataDomain
+	if err := json.Unmarshal(responseData, &responseObject); err != nil {
+		return nil, err
+	}
+
+	if len(responseObject.Data) != 1 {
+		return nil, errors.New("Domain " + domain + " could not be found in AutoDNS")
+	}
+
+	return responseObject.Data[0], nil
+
+}
+
 func (api *autoDNSProvider) getZone(domain string) (*Zone, error) {
 	systemNameServer, err := api.findZoneSystemNameServer(domain)
 	if err != nil {
